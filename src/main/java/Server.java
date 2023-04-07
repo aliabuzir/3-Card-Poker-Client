@@ -1,37 +1,42 @@
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class Server {
-    int count = 1;
-    ArrayList<ClientThreads> clients = new ArrayList<ClientThreads>();
+    private int count = 1;
+    public ArrayList<ClientThreads> clients;
 
-    Acceptor server;
+    private Acceptor server;
     private Consumer<Serializable> callback;
 
+    private String portNumber;
 
-    Server(Consumer<Serializable> call){
 
+    Server(Consumer<Serializable> call, String portNumber){
+        clients = new ArrayList<ClientThreads>();
         callback = call;
         server = new Acceptor();
         server.start();
+        this.portNumber = portNumber;
     }
 
     public class Acceptor extends Thread {
         public void run() {
 
-            try(ServerSocket mysocket = new ServerSocket(5555);){
-                System.out.println("Server is waiting for a client!");
+            try(ServerSocket mysocket = new ServerSocket(Integer.valueOf(portNumber))){
+                //System.out.println("Server is waiting for a client!");
 
 
                 while(true) {
 
-                    if (clients.size() < 4) {
-                        ClientThreads client = new ClientThreads(mysocket.accept(), count);
+                    if (clients.size() <= 4) {
+                        ClientThreads client = new ClientThreads(mysocket.accept(), count, new PokerInfo(false, 0, 0));
+
                         callback.accept("client has connected to server: " + "client #" + count);
                         clients.add(client);
                         client.start();
@@ -40,6 +45,9 @@ public class Server {
 
                 }
             }//end of try
+            catch (BindException e) {
+                callback.accept("Server can't listen to listed port. Do you already have a server running?");
+            }
             catch(Exception e) {
                 callback.accept("Server socket did not launch");
             }
@@ -52,9 +60,14 @@ public class Server {
         ObjectInputStream in;
         ObjectOutputStream out;
 
-        ClientThreads(Socket s, int count){
+        PokerInfo pokerGame;
+
+
+        ClientThreads(Socket s, int count, PokerInfo pokerGame){
             this.connection = s;
             this.count = count;
+            this.pokerGame = pokerGame;
+            send(pokerGame);
         }
 
 
@@ -78,10 +91,22 @@ public class Server {
                 catch(Exception e) {
                     callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
                     clients.remove(this);
+                    count--;
                     break;
                 }
             }
         }//end of run
+
+        public void send(PokerInfo data) {
+
+            try {
+                out.writeObject(data);
+            }
+            catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
     }
 }

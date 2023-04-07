@@ -43,7 +43,7 @@ public class ServerGUI {
                     Platform.runLater(() -> {
                         messages.getItems().add(data.toString());
                     });
-                });
+                }, portInput.getText());
             }
         });
 
@@ -65,6 +65,8 @@ public class ServerGUI {
     private Scene serverDataScene() {
         Text title = new Text("Server Database");
         Button offButton = new Button("Off");
+        //TextField temp = new TextField();
+        //offButton.setOnAction(e->server.clients.get(0).send(temp.getText()));
 
         HBox titleAndButton = new HBox(20, title, offButton);
 

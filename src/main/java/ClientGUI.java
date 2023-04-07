@@ -21,9 +21,14 @@ import javafx.stage.Stage;
 
 public class ClientGUI {
     private Stage primaryStage;
+    private Client client;
+
+    private PokerInfo pokerGame;
+
 
     public ClientGUI(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        //temp = new ListView<>();
     }
 
     public Scene clientWelcomeScene() {
@@ -37,8 +42,18 @@ public class ClientGUI {
         portInputField.setPromptText("Port Number");
 
         Button connectButton = new Button("Connect");
-        connectButton.setOnAction(e->{
-
+        connectButton.setOnAction(e-> {
+            if (!IPInputField.getText().isEmpty() && !portInputField.getText().isEmpty()) {
+                primaryStage.setScene(gameScene());
+                client = new Client(data -> {
+                    Platform.runLater(() -> {
+                        //temp.getItems().add(data.toString());
+                        pokerGame = (PokerInfo) data;
+                        primaryStage.setScene(gameScene());
+                    });
+                }, IPInputField.getText(), portInputField.getText());
+                client.start();
+            }
         });
 
         Image pokerImage = new Image("Cards.png");
@@ -54,6 +69,17 @@ public class ClientGUI {
         BorderPane sceneLayout = new BorderPane(sceneOrganization);
 
         return new Scene(sceneLayout, 800, 800);
+    }
+
+    private Scene gameScene() {
+        TextField input = new TextField();
+
+
+        //if (pokerGame.hasDealerCards == )
+        //Button send = new Button("Send");
+        //send.setOnAction(e->client.send(input.getText()));
+
+        return new Scene(new VBox(input), 800, 800);
     }
 
 
