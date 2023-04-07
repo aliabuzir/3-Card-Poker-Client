@@ -35,7 +35,7 @@ public class Server {
                 while(true) {
 
                     if (clients.size() <= 4) {
-                        ClientThreads client = new ClientThreads(mysocket.accept(), count, new PokerInfo(false, 0, 0));
+                        ClientThreads client = new ClientThreads(mysocket.accept(), new PokerInfo(false, 0, 0));
 
                         callback.accept("client has connected to server: " + "client #" + count);
                         clients.add(client);
@@ -56,18 +56,16 @@ public class Server {
 
     public class ClientThreads extends Thread {
         Socket connection;
-        int count;
+        //int count;
         ObjectInputStream in;
         ObjectOutputStream out;
 
         PokerInfo pokerGame;
 
 
-        ClientThreads(Socket s, int count, PokerInfo pokerGame){
+        ClientThreads(Socket s, PokerInfo pokerGame){
             this.connection = s;
-            this.count = count;
             this.pokerGame = pokerGame;
-            send(pokerGame);
         }
 
 
@@ -77,6 +75,7 @@ public class Server {
                 in = new ObjectInputStream(connection.getInputStream());
                 out = new ObjectOutputStream(connection.getOutputStream());
                 connection.setTcpNoDelay(true);
+                send(pokerGame);
             }
             catch(Exception e) {
                 System.out.println("Streams not open");

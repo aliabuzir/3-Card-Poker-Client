@@ -19,15 +19,25 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 public class ClientGUI {
     private Stage primaryStage;
     private Client client;
 
     private PokerInfo pokerGame;
 
+    private ArrayList<ImageView> cardImages;
+
 
     public ClientGUI(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.cardImages = new ArrayList<>();
+
+        for (int i = 1; i <= 52; i++) {
+            Image temp = new Image(i + ".png");
+            cardImages.add(new ImageView(temp));
+        }
         //temp = new ListView<>();
     }
 
@@ -44,7 +54,7 @@ public class ClientGUI {
         Button connectButton = new Button("Connect");
         connectButton.setOnAction(e-> {
             if (!IPInputField.getText().isEmpty() && !portInputField.getText().isEmpty()) {
-                primaryStage.setScene(gameScene());
+                //primaryStage.setScene(gameScene());
                 client = new Client(data -> {
                     Platform.runLater(() -> {
                         //temp.getItems().add(data.toString());
@@ -74,12 +84,53 @@ public class ClientGUI {
     private Scene gameScene() {
         TextField input = new TextField();
 
+        VBox dealer;
+        VBox player;
 
-        //if (pokerGame.hasDealerCards == )
-        //Button send = new Button("Send");
-        //send.setOnAction(e->client.send(input.getText()));
+        if (pokerGame.gamePhase == 1) {
+            Image backofCard = new Image("BackOfCard.png");
+            ImageView backOfCardView1 = new ImageView(backofCard);
+            ImageView backOfCardView2 = new ImageView(backofCard);
+            ImageView backOfCardView3 = new ImageView(backofCard);
+            ImageView backOfCardView4 = new ImageView(backofCard);
+            ImageView backOfCardView5 = new ImageView(backofCard);
+            ImageView backOfCardView6 = new ImageView(backofCard);
 
-        return new Scene(new VBox(input), 800, 800);
+            HBox dealerSide = new HBox(20, backOfCardView1, backOfCardView2, backOfCardView3);
+            Text dealerLabel = new Text("Dealer Hand");
+            dealer = new VBox(10, dealerSide, dealerLabel);
+
+            HBox playerSide = new HBox(20, backOfCardView4, backOfCardView5, backOfCardView6);
+            Text playerLabel = new Text("Player Hand");
+            player = new VBox(10, playerLabel, playerSide);
+
+            Text anteText = new Text("Place your ante wager $5-$25");
+            TextField anteRequest = new TextField();
+            anteRequest.setPromptText("Required");
+
+            Text pairText = new Text("Pair Plus Wager? $5-$25");
+            TextField pairRequest = new TextField();
+            pairRequest.setPromptText("Optional");
+
+            Button start = new Button("Start");
+            start.setOnAction(e->{
+                if (!anteRequest.getText().isEmpty() && !anteRequest.getText().matches(".*\\D.*") && Integer.valueOf(anteRequest.getText()) >= 5 && Integer.valueOf(anteRequest.getText()) <= 25) {
+                    pokerGame.ante = Integer.valueOf(anteRequest.getText());
+                    if (!pairRequest.getText().isEmpty() && !pairRequest.getText().matches(".*\\D.*") && Integer.valueOf(pairRequest.getText()) >= 5 && Integer.valueOf(pairRequest.getText()) <= 25) {
+                        pokerGame.isPairPlus = true;
+                        pokerGame.pairPlusAmount = Integer.valueOf(pairRequest.getText());
+                    }
+                    client.send(pokerGame);
+                }
+            });
+
+            VBox sceneOrganization = new VBox(10, dealer, anteText, anteRequest, pairText, pairRequest, start, player);
+
+            BorderPane sceneLayout = new BorderPane(sceneOrganization);
+
+            return new Scene(sceneLayout, 800, 800);
+        }
+        return new Scene(new Button("hi"), 800, 800);
     }
 
 

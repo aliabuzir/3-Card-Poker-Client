@@ -21,7 +21,7 @@ public class PokerInfo implements Serializable {
 
     public ArrayList<Integer> dealerCards;
 
-    boolean hasDealerCards;
+    int gamePhase;
     public PokerInfo(boolean isPairPlus, int ante, int pairPlusAmount) {
         cards = new ArrayList<>();
         for (int i = 1; i <= 52; i++) {
@@ -30,7 +30,7 @@ public class PokerInfo implements Serializable {
         this.isPairPlus = isPairPlus;
         this.ante = ante;
         this.pairPlusAmount = pairPlusAmount;
-        this.hasDealerCards = false;
+        this.gamePhase = 1;
     }
 
     public void generateRandomCards(ArrayList<Integer> arrayList) {
